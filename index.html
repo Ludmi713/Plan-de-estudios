@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Malla Interactiva — Diseño Gráfico UBA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --main-bg: #f6f7fa;
+      --card-bg: #ffffff;
+      --accent: #a1b6d0;
+      --blocked: #e0e3eb;
+      --approved: #bbf7c0;
+      --font-main: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+      --font-size: 15px;
+      --text: #34495e;
+    }
+
+    body {
+      background: var(--main-bg);
+      font-family: var(--font-main);
+      color: var(--text);
+      margin: 0;
+      min-height: 100vh;
+      font-size: var(--font-size);
+    }
+
+    h1 {
+      text-align: center;
+      margin: 40px 0 20px 0;
+      font-weight: 700;
+    }
+
+    .malla {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      padding: 0 18px 48px 18px;
+      flex-wrap: wrap;
+    }
+
+    .columna {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 20px;
+      min-width: 210px;
+      box-shadow: 0 2px 10px #a2b1c91f;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .columna h2 {
+      margin: 0 0 12px 0;
+      font-size: 1.03em;
+      letter-spacing: 1px;
+      font-weight: 600;
+      text-align: center;
+      color: #607D8B;
+      background: #ecf0f6;
+      border-radius: 7px;
+      padding: 5px 0;
+    }
+
+    .materia {
+      display: flex;
+      align-items: center;
+      background: #f2f7fa;
+      border-radius: 7px;
+      padding: 9px 7px 9px 11px;
+      margin-bottom: 2px;
+      gap: 8px;
+      transition: background .2s;
+      position: relative;
+      border: 1.3px solid #e2e7f1;
+    }
+
+    .materia.aprobada {
+      background: var(--approved);
+      text-decoration: line-through;
+      color: #50a26d;
+      border-color: #9ae7b1;
+    }
+
+    .materia.bloqueada {
+      background: var(--blocked);
+      color: #a5adb6;
+      cursor: not-allowed !important;
+      opacity: 0.96;
+      border-style: dashed;
+    }
+    .materia:not(.bloqueada):hover {
+      background: #d6eaff;
+      cursor: pointer;
+    }
+
+    .nombre-materia {
+      flex: 1;
+      font-weight: 500;
+      text-align: left;
+      user-select: none;
+    }
+    .nota-select {
+      margin-left: 8px;
+    }
+    .checkmark {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #b6cbe9;
+      border-radius: 4px;
+      margin-right: 7px;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .materia.aprobada .checkmark {
+      border-color: #54bb7c;
+      background: #bbf7c0;
+    }
+    .checkmark .tick {
+      display: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: #41a868;
+    }
+    .materia.aprobada .checkmark .tick {
+      display: block;
+      content: '';
+      width: 12px;
+      height: 12px;
+    }
+    .materia.bloqueada .checkmark {
+      border-color: #e0e3eb;
+      background: #e0e3eb;
+    }
+    .tooltip {
+      display: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 110%;
+      background: #616a86;
+      color: #fff;
+      padding: 7px 11px;
+      border-radius: 6px;
+      font-size: 0.93em;
+      white-space: pre-line;
+      z-index: 2;
+      min-width: 90px;
+      max-width: 210px;
+      box-shadow: 0 2px 13px #22335e18;
+      pointer-events: none;
+    }
+    .materia.bloqueada:hover .tooltip {
+      display: block;
+    }
+    .nota-select {
+      border-radius: 5px;
+      border: 1px solid #becce0;
+      background: #fff;
+      font-family: var(--font-main);
+      color: #376395;
+      font-size: 0.93em;
+      padding: 2px 5px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva — Diseño Gráfico UBA</h1>
+  <div class="malla" id="malla">
+    <!-- Columnas y materias se llenan por JavaScript -->
+  </div>
+<script>
+/* ----- Definición de la malla y correlativas ------ */
+const estructura = [
+  {
+    titulo: 'CBC',
+    materias: [
+      { id: 'cbc.-sye', nombre: 'Int. Sociedad y Estado', req: [] },
+      { id: 'cbc.-pc', nombre: 'Int. Pensamiento Científico', req: [] },
+      { id: 'cbc.-mat', nombre: 'Matemática', req: [] },
+      { id: 'cbc.-sem', nombre: 'Semiología', req: [] },
+      { id: 'cbc.-dib', nombre: 'Taller de dibujo', req: [] },
+      { id: 'cbc.-cp1', nombre: 'Int. Conocimiento Proyectual I', req: [] },
+      { id: 'cbc.-cp2', nombre: 'Int. Conocimiento Proyectual II', req: [] }
+    ]
+  },
+  {
+    titulo: 'Primer año',
+    materias: [
+      { id: 'dg-i', nombre: 'Diseño Gráfico I', req: ['cbc'] },
+      { id: 'morf-i', nombre: 'Morfología I', req: ['cbc'] },
+      { id: 'tipo-i', nombre: 'Tipografía I', req: ['cbc'] },
+      { id: 'tecn-i', nombre: 'Tecnología I', req: ['cbc'] },
+      { id: 'comun-i', nombre: 'Comunicación I', req: ['cbc'] },
+      { id: 'hist-i', nombre: 'Historia I', req: ['cbc'] },
+      { id: 'ilust', nombre: 'Ilustración', req: ['cbc'] }
+    ]
+  },
+  {
+    titulo: 'Segundo año',
+    materias: [
+      { id: 'dg-ii', nombre: 'Diseño gráfico II', req: ['dg-i','morf-i','tipo-i'] },
+      { id: 'morf-ii', nombre: 'Morfología II', req: ['morf-i'] },
+      { id: 'tipo-ii', nombre: 'Tipografía II', req: ['tipo-i','morf-i'] },
+      { id: 'hist-ii', nombre: 'Historia II', req: ['hist-i'] },
+      { id: 'comun-ii', nombre: 'Comunicación II', req: ['comun-i'] },
+      { id: 'tecn-ii', nombre: 'Tecnología II', req: ['tecn-i'] },
+      { id: 'medios-i', nombre: 'Medios expresivos I', req: ['ilust'] }
+    ]
+  },
+  {
+    titulo: 'Tercer año',
+    materias: [
+      { id: 'dg-iii', nombre: 'Diseño gráfico III', req: ['dg-ii','morf-ii','tipo-ii','comun-i','hist-i','tecn-i','ilust'] },
+      { id: 'medios-ii', nombre: 'Medios expresivos II', req: ['medios-i'] },
+      { id: 'leg-prac', nombre: 'Leg. y practica profesional', req: ['dg-ii','morf-ii','tipo-ii','comun-i','hist-i','tecn-i','ilust'] },
+      { id: 'elect-hum', nombre: 'Electiva s. humanistica-Estetica', req: ['dg-ii','morf-ii','tipo-ii','comun-ii','hist-ii','tecn-i','ilust'] },
+      { id: 'opt-1', nombre: 'Optativa-1', req: ['dg-ii','morf-ii','tipo-ii','tecn-ii','medios-i'] },
+      { id: 'opt-2', nombre: 'Optativa-2', req: ['dg-ii','morf-ii','tipo-ii','tecn-ii','medios-i'] }
+    ]
+  },
+  {
+    titulo: 'Cuarto año',
+    materias: [
+      { id: 'dg-iv', nombre: 'Diseño gráfico IIII', req: ['dg-iii','morf-ii','tipo-ii','tecn-ii','medios-i','comun-ii','hist-ii'] },
+      { id: 'elect-o-1', nombre: 'Electiva Orientada-1', req: ['dg-iii','morf-ii','tipo-ii','tecn-ii','medios-i'] },
+      { id: 'elect-o-2', nombre: 'Electiva Orientada-1', req: ['dg-iii','morf-ii','tipo-ii','tecn-ii','medios-i'] },
+      { id: 'sem-1', nombre: 'Seminario-1', req: ['dg-ii','morf-ii','tipo-ii','tecn-ii','medios-i'] },
+      { id: 'sem-2', nombre: 'Seminario-2', req: ['dg-ii','morf-ii','tipo-ii','tecn-ii','medios-i'] },
+      { id: 'sem-3', nombre: 'Seminario-3', req: ['dg-ii','morf-ii','tipo-ii','tecn-ii','medios-i'] }
+    ]
+  }
+];
+
+// CBC completo es aprobados todos los del CBC
+const cbcIds = estructura[0].materias.map(m => m.id);
+function checkCBC(aprob) {
+  return cbcIds.every(id => aprob[id]);
+}
+
+/* -------- Generador y lógica -------- */
+const mallaDiv = document.getElementById('malla');
+let estado = {}; // { [id]: {aprobada: bool, nota: string} }
+if(localStorage.getItem('malla-dguba')) {
+  estado = JSON.parse(localStorage.getItem('malla-dguba'));
+}
+function saveState() {
+  localStorage.setItem('malla-dguba', JSON.stringify(estado));
+}
+
+function correlativasCumplidas(materia, aprobadas) {
+  if(materia.req.length === 0) return true;
+  // si requisito es 'cbc', debe estar todo el cbc aprobado
+  return materia.req.every(req =>
+    req === 'cbc'
+      ? checkCBC(aprobadas)
+      : aprobadas[req] && aprobadas[req].aprobada
+  );
+}
+
+function correlativasFaltantes(materia, aprobadas) {
+  let faltan = [];
+  for(const req of materia.req) {
+    if(req === 'cbc') {
+      const cbcNo = cbcIds.filter(id => !(aprobadas[id] && aprobadas[id].aprobada));
+      if(cbcNo.length) faltan.push('Completar CBC');
+    } else if(!(aprobadas[req] && aprobadas[req].aprobada)) {
+      faltan.push(nombreMateriaPorId(req));
+    }
+  }
+  return faltan;
+}
+
+function nombreMateriaPorId(id) {
+  for(const col of estructura)
+    for(const m of col.materias)
+      if(m.id === id) return m.nombre;
+  return id;
+}
+
+function notaSelectHtml(idMateria, notaSeleccionada) {
+  const opciones = `<option value="">Nota</option>` +
+    Array.from({length:11}, (_,i)=>i+4)
+      .map(n=>`<option value="${n}"${notaSeleccionada==String(n)?' selected':''}>${n}</option>`).join('');
+  return `<select class="nota-select" data-materia="${idMateria}">${opciones}</select>`;
+}
+
+function render() {
+  mallaDiv.innerHTML = '';
+  let aprob = {};
+  for(const id in estado) aprob[id] = estado[id];
+
+  estructura.forEach(col => {
+    let colDiv = document.createElement("div");
+    colDiv.className = "columna";
+    let h2 = document.createElement("h2");
+    h2.textContent = col.titulo;
+    colDiv.appendChild(h2);
+
+    col.materias.forEach(mat => {
+      let aprobada = aprob[mat.id] && aprob[mat.id].aprobada;
+      let bloqueada = !correlativasCumplidas(mat, aprob);
+
+      let matDiv = document.createElement("div");
+      matDiv.className = "materia";
+      if(aprobada) matDiv.classList.add("aprobada");
+      else if(bloqueada) matDiv.classList.add("bloqueada");
+
+      matDiv.innerHTML = `
+        <div class="checkmark">${aprobada ? '<div class="tick"></div>' : ''}</div>
+        <div class="nombre-materia">${mat.nombre}</div>
+        ${!bloqueada||aprobada ? notaSelectHtml(mat.id, aprob[mat.id]?.nota) : ''}
+        ${bloqueada&&!aprobada
+          ? `<div class="tooltip">Correlativas faltantes:\n${correlativasFaltantes(mat, aprob).join('\n')}</div>`
+          : ""}
+      `;
+      if(!bloqueada) {
+        matDiv.addEventListener('click', (e) => {
+          // Solo en el fondo; evitar clic en <select>
+          if(e.target.tagName.toLowerCase()==='select') return;
+          estado[mat.id] = {...estado[mat.id], aprobada: !aprobada};
+          saveState(); render();
+        });
+      }
+      colDiv.appendChild(matDiv);
+    });
+    mallaDiv.appendChild(colDiv);
+  });
+
+  // Agregar listeners a los selects de nota:
+  document.querySelectorAll('.nota-select').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const idMat = sel.getAttribute('data-materia');
+      if(!estado[idMat]) estado[idMat] = {};
+      estado[idMat].nota = sel.value;
+      saveState();
+    });
+  });
+}
+
+render();
+</script>
+<!-- Tipografía Google Fonts -->
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,600&display=swap" rel="stylesheet">
+</body>
+</html>
