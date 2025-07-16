@@ -298,59 +298,58 @@ function render() {
   let aprob = {};
   for(const id in estado) aprob[id] = estado[id];
 
-  estructura.forEach(col => {
-    let colDiv = document.createElement("div");
-    colDiv.className = "columna";
-    let h2 = document.createElement("h2");
-    h2.textContent = col.titulo;
-    colDiv.appendChild(h2);
-
-     if (esPrimerAnio && !cbcCompleto) {
-      const aviso = document.createElement('div');
-      aviso.style = 'color:#b14; background:#e0e3eb; padding:6px 8px; border-radius:7px; margin-bottom:12px; text-align:center; font-size:0.95em;';
-      aviso.textContent = 'Debes aprobar todas las materias del CBC para desbloquear el Primer año.';
-      colDiv.appendChild(aviso);
-    }
-
-    const esPrimerAnio = col.titulo === 'Primer año';
-const cbcCompleto = checkCBC(aprob);
-
-col.materias.forEach(mat => {
-  let aprobada = aprob[mat.id] && aprob[mat.id].aprobada;
-  let bloqueada;
+estructura.forEach(col => {
+  let colDiv = document.createElement("div");
+  colDiv.className = "columna";
+  
+  const esPrimerAnio = col.titulo === 'Primer año';
+  const cbcCompleto = checkCBC(aprob);
+  
+  let h2 = document.createElement("h2");
+  h2.textContent = col.titulo;
+  colDiv.appendChild(h2);
 
   if (esPrimerAnio && !cbcCompleto) {
-    // Bloquea TODO el primer año mientras CBC incompleto
-    bloqueada = true;
-  } else {
-    bloqueada = !correlativasCumplidas(mat, aprob);
+    const aviso = document.createElement('div');
+    aviso.style = 'color:#b14; background:#e0e3eb; padding:6px 8px; border-radius:7px; margin-bottom:12px; text-align:center; font-size:0.95em;';
+    aviso.textContent = 'Debes aprobar todas las materias del CBC para desbloquear el Primer año.';
+    colDiv.appendChild(aviso);
   }
+  
+  col.materias.forEach(mat => {
+    let aprobada = aprob[mat.id]?.aprobada === true;
+    let bloqueada;
 
-      let matDiv = document.createElement("div");
-      matDiv.className = "materia";
-      if(aprobada) matDiv.classList.add("aprobada");
-      else if(bloqueada) matDiv.classList.add("bloqueada");
+    if (esPrimerAnio && !cbcCompleto) {
+      bloqueada = true;
+    } else {
+      bloqueada = !correlativasCumplidas(mat, aprob);
+    }
 
-      matDiv.innerHTML = `
-        <div class="checkmark">${aprobada ? '<div class="tick"></div>' : ''}</div>
-        <div class="nombre-materia">${mat.nombre}</div>
-        ${!bloqueada||aprobada ? notaSelectHtml(mat.id, aprob[mat.id]?.nota) : ''}
-        ${bloqueada&&!aprobada
-          ? `<div class="tooltip">Correlativas faltantes:\n${correlativasFaltantes(mat, aprob).join('\n')}</div>`
-          : ""}
-      `;
-      if(!bloqueada) {
-        matDiv.addEventListener('click', (e) => {
-          // Solo en el fondo; evitar clic en <select>
-          if(e.target.tagName.toLowerCase()==='select') return;
-          estado[mat.id] = {...estado[mat.id], aprobada: !aprobada};
-          saveState(); render();
-        });
-      }
-      colDiv.appendChild(matDiv);
-    });
-    mallaDiv.appendChild(colDiv);
+    let matDiv = document.createElement("div");
+    matDiv.className = "materia";
+    if(aprobada) matDiv.classList.add("aprobada");
+    else if(bloqueada) matDiv.classList.add("bloqueada");
+
+    matDiv.innerHTML = `
+      <div class="checkmark">${aprobada ? '<div class="tick"></div>' : ''}</div>
+      <div class="nombre-materia">${mat.nombre}</div>
+      ${(!bloqueada || aprobada) ? notaSelectHtml(mat.id, aprob[mat.id]?.nota) : ''}
+      ${bloqueada && !aprobada ? `<div class="tooltip">Correlativas faltantes:\n${correlativasFaltantes(mat, aprob).join('\n')}</div>` : ""}
+    `;
+
+    if(!bloqueada) {
+      matDiv.addEventListener('click', (e) => {
+        if(e.target.tagName.toLowerCase() === 'select') return;
+        estado[mat.id] = {...estado[mat.id], aprobada: !aprobada};
+        saveState();
+        render();
+      });
+    }
+    colDiv.appendChild(matDiv);
   });
+  mallaDiv.appendChild(colDiv);
+});
 
   // Agregar listeners a los selects de nota:
   document.querySelectorAll('.nota-select').forEach(sel => {
