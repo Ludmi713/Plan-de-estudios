@@ -237,6 +237,41 @@ const estructura = [
     ]
   }
 ];
+estructura.forEach(col => {
+  const esPrimerAnio = col.titulo === 'Primer año';
+  const cbcCompleto = checkCBC(estado);
+
+  const colDiv = document.createElement('div');
+  colDiv.className = 'columna';
+
+  const h2 = document.createElement('h2');
+  h2.textContent = col.titulo;
+  colDiv.appendChild(h2);
+
+  // Si es el primer año y el CBC no está completo, bloquear la columna o materias
+  if (esPrimerAnio && !cbcCompleto) {
+    // Mostrar mensaje explicativo (opcional)
+    const aviso = document.createElement('div');
+    aviso.style = 'color:#b14; background:#e0e3eb; margin-bottom:12px; border-radius:7px; padding:6px 8px; font-size:0.95em;text-align:center;';
+    aviso.textContent = 'Para desbloquear el Primer año debe aprobar todo el CBC.';
+    colDiv.appendChild(aviso);
+  }
+
+  col.materias.forEach(mat => {
+    let bloqueada = false;
+
+    if (esPrimerAnio && !cbcCompleto) {
+      bloqueada = true;  // Bloquear todas materias mientras CBC no exista completo
+    } else {
+      bloqueada = !correlativasCumplidas(mat, estado);
+    }
+
+    // Crear la materia con la variable bloqueada...
+    // (Aquí va el código que generate las materias según ese estado)
+  });
+
+  mallaDiv.appendChild(colDiv);
+});
 
 // CBC completo es aprobados todos los del CBC
 const cbcIds = estructura[0].materias.map(m => m.id);
